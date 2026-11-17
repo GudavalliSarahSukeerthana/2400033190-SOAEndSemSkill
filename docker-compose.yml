@@ -1,0 +1,30 @@
+
+services:
+  app-db:
+    image: postgres:16
+    container_name: app-db
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app-service:
+    build: .
+    container_name: app-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      app-db:
+        condition: service_healthy
+
+volumes:
+  db-data:
